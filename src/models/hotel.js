@@ -11,6 +11,7 @@ module.exports = (sequelize, DataTypes) => {
       // define association here
       hotel.belongsTo(models.city);
       hotel.hasMany(models.image);
+      hotel.hasMany(models.booking);
     }
   }
   hotel.init(
