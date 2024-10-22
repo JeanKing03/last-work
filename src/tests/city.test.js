@@ -12,19 +12,19 @@ beforeAll(async () => {
   const user = {
     firstName: "Jean",
     lastName: "Carlos",
-    email: "jean@gmail.com.kg",
+    email: "jean@gmail.com",
     password: "jean123",
     gender: "male",
   };
 
-  const BASE_URL = "/api/v1/users";
+  const BASE_URL_USER = "/api/v1/users";
 
-  const resPost = await request(app).post(BASE_URL).send(user);
-  userId = resPost.body.id;
+  const resUser = await request(app).post(BASE_URL_USER).send(user);
+  userId = resUser.body.id;
 
   const resLogin = await request(app)
-    .post(`${BASE_URL}/login`)
-    .send({ email: "jean@gmail.com.kg", password: "jean123" });
+    .post(`${BASE_URL_USER}/login`)
+    .send({ email: "jean@gmail.com", password: "jean123" });
   token = `Bearer ${resLogin.body.token}`;
 });
 

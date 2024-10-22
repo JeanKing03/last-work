@@ -16,7 +16,7 @@ let token;
 const user = {
   firstName: "Jean",
   lastName: "Carlos",
-  email: "jean@gmail.com.kg",
+  email: "jean@gmail.com",
   password: "jean123",
   gender: "male",
 };
@@ -37,27 +37,27 @@ test("POST -> 'BASE_URL' should return status code 201, res.body.email === user.
   expect(res.body.name).toBe(user.name);
 });
 
+// !LOGIN
+test("LOGIN -> 'BASE_URL/login' should return status code 401", async () => {
+  const res = await request(app)
+    .post(`${BASE_URL}/login`)
+    .send({ email: "carlos@gmail.com", password: "jean123" });
+
+  expect(res.status).toBe(401);
+  expect(res.body.message).toBe("Invalid Credential!");
+});
+
 // LOGIN
 test("LOGIN -> 'BASE_URL/login' should return status code 200, res.body.user  and res.body.token to be defined ", async () => {
   const res = await request(app)
     .post(`${BASE_URL}/login`)
-    .send({ email: "jean@gmail.com.kg", password: "jean123" });
+    .send({ email: "jean@gmail.com", password: "jean123" });
   token = `Bearer ${res.body.token}`;
 
   expect(res.status).toBe(200);
   expect(res.body.user).toBeDefined();
   expect(res.body.token).toBeDefined();
   expect(res.body.user.email).toBe(user.email);
-});
-
-// !LOGIN
-test("LOGIN -> 'BASE_URL/login' should return status code 401", async () => {
-  const res = await request(app)
-    .post(`${BASE_URL}/login`)
-    .send({ email: "jean@gmail.com", password: "jean123" });
-
-  expect(res.status).toBe(401);
-  expect(res.body.message).toBe("Invalid Credential!");
 });
 
 // GET-LOGGED

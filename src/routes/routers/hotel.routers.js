@@ -10,7 +10,11 @@ const verifyJWT = require("../../utils/verifyJWT");
 
 const routerHotel = express.Router();
 
-routerHotel.route("/").post(create).get(getAll);
-routerHotel.route("/:id").get(getOne).put(update).delete(remove);
+routerHotel.route("/").post(verifyJWT, create).get(getAll);
+routerHotel
+  .route("/:id")
+  .get(getOne)
+  .put(verifyJWT, update)
+  .delete(verifyJWT, remove);
 
 module.exports = routerHotel;

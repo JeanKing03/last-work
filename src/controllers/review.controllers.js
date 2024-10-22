@@ -4,7 +4,7 @@ const {
   getOneServices,
   updateServices,
   removeServices,
-} = require("../services/booking.services");
+} = require("../services/review.services");
 const catchError = require("../utils/catchError");
 
 const create = catchError(async (req, res) => {
@@ -28,7 +28,7 @@ const update = catchError(async (req, res) => {
   const { id } = req.params;
   const result = await updateServices(req.body, id);
   if (result[0] === 0) return res.sendStatus(404);
-  return res.json(result[1][0]);
+  return res.json(result[1]);
 });
 
 const remove = catchError(async (req, res) => {

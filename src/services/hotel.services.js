@@ -1,15 +1,15 @@
-const { hotel, city, image, booking } = require("../models");
+const { hotel, city, image, booking, review } = require("../models");
 
 const createServices = async (body) => {
   return await hotel.create(body);
 };
 
 const getAllServices = async () => {
-  return await hotel.findAll({ include: [city, image] });
+  return await hotel.findAll({ include: [city, image, booking, review] });
 };
 
 const getOneServices = async (id) => {
-  return await hotel.findByPk(id);
+  return await hotel.findByPk(id, { include: [city, image, booking, review] });
 };
 
 const updateServices = async (body, id) => {

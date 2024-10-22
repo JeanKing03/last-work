@@ -1,7 +1,7 @@
 "use strict";
 const { Model } = require("sequelize");
 module.exports = (sequelize, DataTypes) => {
-  class hotel extends Model {
+  class review extends Model {
     /**
      * Helper method for defining associations.
      * This method is not a part of Sequelize lifecycle.
@@ -9,46 +9,23 @@ module.exports = (sequelize, DataTypes) => {
      */
     static associate(models) {
       // define association here
-      hotel.belongsTo(models.city);
-      hotel.hasMany(models.image);
-      hotel.hasMany(models.booking);
-      hotel.hasMany(models.review);
+      review.belongsTo(models.hotel);
     }
   }
-  hotel.init(
+  review.init(
     {
-      name: {
-        type: DataTypes.STRING,
-        allowNull: false,
-      },
-      description: {
-        type: DataTypes.TEXT,
-        allowNull: false,
-      },
-      price: {
-        type: DataTypes.DECIMAL,
-        allowNull: false,
-      },
-      address: {
-        type: DataTypes.STRING,
-        allowNull: false,
-      },
-      lat: {
-        type: DataTypes.DECIMAL,
-        allowNull: false,
-      },
-      lon: {
-        type: DataTypes.DECIMAL,
-        allowNull: false,
-      },
       rating: {
         type: DataTypes.DECIMAL,
         allowNull: false,
       },
-      cityId: {
+      comment: {
+        type: DataTypes.TEXT,
+        allowNull: false,
+      },
+      hotelId: {
         type: DataTypes.INTEGER,
         references: {
-          model: "cities",
+          model: "hotels",
           key: "id",
         },
       },
@@ -63,8 +40,8 @@ module.exports = (sequelize, DataTypes) => {
     },
     {
       sequelize,
-      modelName: "hotel",
+      modelName: "review",
     }
   );
-  return hotel;
+  return review;
 };
