@@ -66,6 +66,7 @@ test("POST -> 'BASE_URL'should return status code 201 and res.body.name === city
 // GET-ALL
 test("GET -> 'BASE_URL' should return status code 200 and res.body and res.body to haven't length === 0", async () => {
   const res = await request(app).get(BASE_URL);
+  
 
   expect(res.status).toBe(200);
   expect(res.body).toBeDefined();
