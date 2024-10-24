@@ -62,23 +62,19 @@ beforeAll(async () => {
 
 //! AFTER_ALL
 afterAll(async () => {
-  const BASE_URL_USER = "/api/v1/users";
-  const BASE_URL_CITY = "/api/v1/cities";
-  const BASE_URL_HOTEL = "/api/v1/hotels";
-
   // DELETE USER
   await request(app)
-    .delete(`${BASE_URL_USER}/${userId}`)
+    .delete(`${"/api/v1/users"}/${userId}`)
     .set("authorization", token);
 
   // DELETE CITY
   await request(app)
-    .delete(`${BASE_URL_CITY}/${cityId}`)
+    .delete(`${"/api/v1/cities"}/${cityId}`)
     .set("authorization", token);
 
   // DELETE HOTEL
   await request(app)
-    .delete(`${BASE_URL_HOTEL}/${hotelId}`)
+    .delete(`${"/api/v1/hotels"}/${hotelId}`)
     .set("authorization", token);
 });
 
@@ -94,10 +90,6 @@ const booking = {
   checkIn: "2100-01-01T00:00:00.000Z",
   checkOut: "2100-01-10",
   hotelId,
-};
-
-const updateBooking = {
-  checkIn: "2095-01-11T00:00:00.000Z",
 };
 
 // POST
@@ -134,15 +126,17 @@ test("GET -> 'BASE_URL/:id' should return status code 200 and res.body.checkIn =
 });
 
 // UPDATE
-test("PUT -> 'BASE_URL/:id' shuold return status code 200 and res.body.checkIn === updateBooking.checkIn", async () => {
+test("PUT -> 'BASE_URL/:id' shuold return status code 200 and res.body.checkIn must be the same as those sent.", async () => {
   const res = await request(app)
     .put(`${BASE_URL}/${bookingId}`)
     .set("authorization", token)
-    .send(updateBooking);
+    .send({
+      checkIn: "2095-01-11T00:00:00.000Z",
+    });
 
   expect(res.status).toBe(200);
   expect(res.body).toBeDefined();
-  expect(res.body.checkIn).toBe(updateBooking.checkIn);
+  expect(res.body.checkIn).toBe("2095-01-11T00:00:00.000Z");
 });
 
 // DELETE

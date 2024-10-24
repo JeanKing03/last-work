@@ -3,82 +3,65 @@ const app = require("../app");
 
 //! BEFORE_ALL
 beforeAll(async () => {
-  const BASE_URL_USER = "/api/v1/users";
-  const BASE_URL_CITY = "/api/v1/cities";
-  const BASE_URL_HOTEL = "/api/v1/hotels";
-
-  // USER
-  const user = {
+  //* POST --> USER
+  const resUSer = await request(app).post("/api/v1/users").send({
     firstName: "Jean",
     lastName: "Carlos",
     email: "jean@gmail.com",
     password: "jean123",
     gender: "male",
-  };
-
-  //* POST --> USER
-  const resUSer = await request(app).post(BASE_URL_USER).send(user);
+  });
   userId = resUSer.body.id;
 
   //* POST --> LOGIN
   const resLogin = await request(app)
-    .post(`${BASE_URL_USER}/login`)
+    .post(`${"/api/v1/users"}/login`)
     .send({ email: "jean@gmail.com", password: "jean123" });
   token = `Bearer ${resLogin.body.token}`;
 
-  // CITY
-  const city = {
-    name: "Santo Domingo",
-    country: "REP. DOM.",
-    countryId: "RD",
-  };
-
   //* POST --> CITY
   const resCity = await request(app)
-    .post(BASE_URL_CITY)
-    .send(city)
+    .post("/api/v1/cities")
+    .send({
+      name: "Santo Domingo",
+      country: "REP. DOM.",
+      countryId: "RD",
+    })
     .set("authorization", token);
   cityId = resCity.body.id;
 
-  //  HOTEL
-  const hotel = {
-    name: "King Green Palaces",
-    description: "Disfruta",
-    price: 20.99,
-    address: "Punta Cana",
-    lat: 185.62,
-    lon: 203.254,
-    rating: 9.9,
-    cityId,
-  };
-
   //* POST --> HOTEL
   const resHotel = await request(app)
-    .post(BASE_URL_HOTEL)
-    .send(hotel)
+    .post("/api/v1/hotels")
+    .send({
+      name: "King Green Palaces",
+      description: "Disfruta",
+      price: 20.99,
+      address: "Punta Cana",
+      lat: 185.62,
+      lon: 203.254,
+      rating: 9.9,
+      cityId,
+    })
     .set("authorization", token);
   hotelId = resHotel.body.id;
 });
 
 //! AFTER_ALL
 afterAll(async () => {
-  const BASE_URL_USER = "/api/v1/users";
-  const BASE_URL_CITY = "/api/v1/cities";
-  const BASE_URL_HOTEL = "/api/v1/hotels";
-
   // DELETE USER
   await request(app)
-    .delete(`${BASE_URL_USER}/${userId}`)
+    .delete(`/api/v1/users/${userId}`)
     .set("authorization", token);
 
   // DELETE CITY
   await request(app)
-    .delete(`${BASE_URL_CITY}/${cityId}`)
+    .delete(`/api/v1/cities/${cityId}`)
     .set("authorization", token);
 
   // DELETE HOTEL
   await request(app)
-    .delete(`${BASE_URL_HOTEL}/${hotelId}`)
+    .delete(`/api/v1/hotels/${hotelId}`)
     .set("authorization", token);
 });
 
@@ -93,12 +76,6 @@ let reviewId;
 const review = {
   rating: "9.5",
   comment: "Buen Servicio, Pienso Regresar Algun Dia",
-  hotelId,
-};
-
-const updateReview = {
-  rating: "10.0",
-  comment: "Buen Servicio, Excelente!",
   hotelId,
 };
 
@@ -137,16 +114,20 @@ test("GET -> 'BASE_URL/:id' should return status code 200 and res.body.comment =
 });
 
 // UPDATE
-test("PUT -> 'BASE_URL/:id' shuold return status code 200 and res.body.comment === updateReview.comment", async () => {
+test("PUT -> 'BASE_URL/:id' shuold return status code 200 and and res.body.rating/comment must be the same as those sent.", async () => {
   const res = await request(app)
     .put(`${BASE_URL}/${reviewId}`)
     .set("authorization", token)
-    .send(updateReview);
+    .send({
+      rating: "10.0",
+      comment: "Buen Servicio, Excelente!",
+      hotelId,
+    });
 
   expect(res.status).toBe(200);
   expect(res.body).toBeDefined();
-  expect(res.body.rating).toBe(updateReview.rating);
-  expect(res.body.comment).toBe(updateReview.comment);
+  expect(res.body.rating).toBe("10.0");
+  expect(res.body.comment).toBe("Buen Servicio, Excelente!");
 });
 
 // DELETE
