@@ -1,5 +1,6 @@
 const request = require("supertest");
 const app = require("../app");
+const { DESCRIBE } = require("sequelize/lib/query-types");
 
 //? POST --> 🔒
 //? GET-ALL --> 🔓
@@ -55,6 +56,16 @@ afterAll(async () => {
   await request(app)
     .delete(`/api/v1/cities/${cityId}`)
     .set("authorization", token);
+
+  // DELETE CITY
+  await request(app)
+    .delete(`/api/v1/bookings/${bookingId}`)
+    .set("authorization", token);
+
+  // DELETE CITY
+  await request(app)
+    .delete(`/api/v1/cities/${cityId}`)
+    .set("authorization", token);
 });
 
 // HOTEL
@@ -69,13 +80,6 @@ const hotel = {
   cityId,
 };
 
-// //* POST --> HOTEL
-// const resHotel = await request(app)
-//   .post(BASE_URL_HOTEL)
-//   .set("authorization", token)
-//   .send(hotel);
-// hotelId = resHotel.body.id;
-
 // POST
 test("POST -> 'BASE_URL' should return status code 200 and res.body.name === hotel.name", async () => {
   const res = await request(app)
@@ -87,5 +91,84 @@ test("POST -> 'BASE_URL' should return status code 200 and res.body.name === hot
   expect(res.status).toBe(201);
   expect(res.body).toBeDefined();
   expect(res.body.name).toBe(hotel.name);
+
+  //! -------------- INSERTANDO LOS REGISTRO QUE DEPENDEN DE HOTEL --------------------
+
+  //* POST --> BOOKING
+  const resBooking = await request(app)
+    .post("/api/v1/bookings")
+    .send({
+      checkIn: "2100-01-01T00:00:00.000Z",
+      checkOut: "2100-01-10",
+      hotelId,
+    })
+    .set("authorization", token);
+  bookingId = resBooking.body.id;
+
+  // POST -> IMAGE
+  const resImage = await request(app)
+    .post("/api/v1/images")
+    .send({
+      url: "htt://www.imagen.com",
+      hotelId,
+    })
+    .set("authorization", token);
+  imageId = resImage.body.id;
+
+  // POST -> REVIEW
+  const resReview = await request(app)
+    .post("/api/v1/reviews")
+    .send({
+      rating: "9.5",
+      comment: "Buen Servicio, Pienso Regresar Algun Dia",
+      hotelId,
+    })
+    .set("authorization", token);
+  reviewId = resReview.body.id;
+  // ! ---------------------------------------------------------------------
 });
 
+// GET-ALL
+test("GET -> 'BASE_URL' should return status code 200  and res.body to haven't length === 0", async () => {
+  const res = await request(app).get(BASE_URL).set("authorization", token);
+
+  expect(res.status).toBe(200);
+  expect(res.body).toBeDefined();
+  expect(res.body).toHaveLength(1);
+  expect(res.body[0].name).toBe(hotel.name);
+});
+
+// GET-ONE
+test("GET -> 'BASE_URL/:id' should return status code 200 and res.body.name === hotel.name ", async () => {
+  const res = await request(app)
+    .get(`${BASE_URL}/${hotelId}`)
+    .set("authorization", token);
+
+  console.log(res.body);
+
+  expect(res.status).toBe(200);
+  expect(res.body).toBeDefined();
+  expect(res.body.name).toBe(hotel.name);
+  expect(res.body.city.name).toBe("Santo Domingo");
+  expect(res.body.images[0].url).toBe("htt://www.imagen.com");
+  expect(res.body.bookings[0].checkIn).toBe("2100-01-01T00:00:00.000Z");
+  expect(res.body.reviews[0].comment).toBe(
+    "Buen Servicio, Pienso Regresar Algun Dia"
+  );
+});
+
+// UPDATE
+test("PUT -> 'BASE_URL/:id' shuold return status code 200 and res.body.name === updateHotel.name", async () => {
+  const res = await request(app)
+    .put(`${BASE_URL}/${hotelId}`)
+    .set("authorization", token)
+    .send({
+      name: "King Lion 5 Star",
+      rating: 10.0,
+    });
+
+  expect(res.status).toBe(200);
+  expect(res.body).toBeDefined();
+  expect(res.body.rating).toBe(10.0);
+  expect(res.body.comment).toBe("King Lion 5 Star");
+});
