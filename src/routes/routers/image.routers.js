@@ -10,11 +10,7 @@ const verifyJWT = require("../../utils/verifyJWT");
 
 const routerImage = express.Router();
 
-routerImage.route("/").post(verifyJWT, create).get(getAll);
-routerImage
-  .route("/:id")
-  .get(verifyJWT, getOne)
-  .put(verifyJWT, update)
-  .delete(verifyJWT, remove);
+routerImage.route("/").post(create).get(getAll);
+routerImage.route("/:id").get(getOne).put(update).delete(remove);
 
 module.exports = routerImage;

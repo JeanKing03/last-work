@@ -17,15 +17,13 @@ let imageId;
 
 //! BEFORE_ALL
 beforeAll(async () => {
-  const user = {
+  const resUser = await request(app).post("/api/v1/users").send({
     firstName: "Jean",
     lastName: "Carlos",
     email: "jean@gmail.com",
     password: "jean123",
     gender: "male",
-  };
-
-  const resUser = await request(app).post("/api/v1/users").send(user);
+  });
   userId = resUser.body.id;
 
   const resLogin = await request(app)
@@ -50,16 +48,6 @@ afterAll(async () => {
   // DELETE USER
   await request(app)
     .delete(`/api/v1/users/${userId}`)
-    .set("authorization", token);
-
-  // DELETE CITY
-  await request(app)
-    .delete(`/api/v1/cities/${cityId}`)
-    .set("authorization", token);
-
-  // DELETE CITY
-  await request(app)
-    .delete(`/api/v1/bookings/${bookingId}`)
     .set("authorization", token);
 
   // DELETE CITY
@@ -139,12 +127,10 @@ test("GET -> 'BASE_URL' should return status code 200  and res.body to haven't l
 });
 
 // GET-ONE
-test("GET -> 'BASE_URL/:id' should return status code 200 and res.body.name === hotel.name ", async () => {
+test("GET -> 'BASE_URL/:id' should return status code 200, res.body.name === hotel.name , res.body.[city, images, bookings and reviews] must be defined and recorded ", async () => {
   const res = await request(app)
     .get(`${BASE_URL}/${hotelId}`)
     .set("authorization", token);
-
-  console.log(res.body);
 
   expect(res.status).toBe(200);
   expect(res.body).toBeDefined();
@@ -158,17 +144,44 @@ test("GET -> 'BASE_URL/:id' should return status code 200 and res.body.name === 
 });
 
 // UPDATE
-test("PUT -> 'BASE_URL/:id' shuold return status code 200 and res.body.name === updateHotel.name", async () => {
+test("PUT -> 'BASE_URL/:id' shuold return status code 200 and res.body.name/rating must be the same as those sent. ", async () => {
   const res = await request(app)
     .put(`${BASE_URL}/${hotelId}`)
     .set("authorization", token)
     .send({
       name: "King Lion 5 Star",
-      rating: 10.0,
+      rating: 10,
     });
 
   expect(res.status).toBe(200);
   expect(res.body).toBeDefined();
-  expect(res.body.rating).toBe(10.0);
-  expect(res.body.comment).toBe("King Lion 5 Star");
+  expect(res.body.rating).toBe("10");
+  expect(res.body.name).toBe("King Lion 5 Star");
+});
+
+// DELETE
+test("DELETE -> 'BASE_URL/:id' shuold return status code 204", async () => {
+  //! ELIMINANDO LOS REGISTRO [BOOKING, IMAGES, Y REVIEW], YA QUE NO LO ESTAN HACIENDDO EN CASCADA Y LUEGO HAGO EL TEST DELETE DE HOTEL
+
+  // DELETE BOOKING
+  await request(app)
+    .delete(`/api/v1/bookings/${bookingId}`)
+    .set("authorization", token);
+
+  // DELETE IMAGE
+  await request(app)
+    .delete(`/api/v1/images/${imageId}`)
+    .set("authorization", token);
+
+  // DELETE REVIEW
+  await request(app)
+    .delete(`/api/v1/reviews/${reviewId}`)
+    .set("authorization", token);
+
+  // ? DELETE HOTEL
+  const res = await request(app)
+    .delete(`${BASE_URL}/${hotelId}`)
+    .set("authorization", token);
+
+  expect(res.status).toBe(204);
 });
